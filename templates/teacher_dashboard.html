@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome, {{ session['name'] }}</h2>
+        <p>This is your teacher dashboard.</p>
+        
+        <h3>Select a Subject:</h3>
+        <form action="#" method="post">
+            <select name="subject" id="subject">
+                {% for subject in subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Go</button>
+        </form>
+        
+        <!-- Add teacher-specific content here, such as marking attendance -->
+
+        <p><a href="{{ url_for('index') }}">Back to Home</a></p>
+    </div>
+</body>
+</html>
