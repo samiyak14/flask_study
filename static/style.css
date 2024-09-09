@@ -93,3 +93,24 @@ p {
     margin-top: 10px;
 }
 
+.flash-messages {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flash-messages li {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.flash-messages .error {
+    color: #d9534f;
+    background-color: #f2dede;
+}
+
+.flash-messages .info {
+    color: #5bc0de;
+    background-color: #d9edf7;
+}
+
