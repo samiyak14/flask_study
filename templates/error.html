@@ -1,14 +1,16 @@
+<!-- error.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Error</title>
 </head>
 <body>
-    <h1>Welcome, {{ session['name'] }}!</h1>
-    <p>Here is your attendance data.</p>
+    <h2>{{ message }}</h2>
     <a href="{{ url_for('logout') }}">Logout</a>
+    <p><a href="{{ url_for('teacher_dashboard') }}">Back to Dashboard</a></p>
+
 
 </body>
 </html>

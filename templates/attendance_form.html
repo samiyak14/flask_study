@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+</head>
+<body>
+    <h2>Mark Attendance for {{ selected_subject }} - {{ selected_class }}</h2>
+    
+    <form action="{{ url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject) }}" method="post">
+        <label for="date">Date:</label>
+        <input type="text" id="date" name="date" required><br>
+        
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br>
+        
+        <label for="absent_roll_numbers">Enter Absent Roll Numbers (comma-separated):</label><br>
+        <input type="text" id="absent_roll_numbers" name="absent_roll_numbers" required><br><br>
+        
+        <button type="submit">Submit Attendance</button>
+    </form>
+</body>
+</html>

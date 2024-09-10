@@ -9,8 +9,14 @@
 <body>
     <div class="container">
         <h1>Welcome to the Student Attendance Portal</h1>
-        <p><a href="{{ url_for('login_student') }}">Student Login</a></p>
-        <p><a href="{{ url_for('login_teacher') }}">Teacher Login</a></p>
+        <a href="{{ url_for('login_teacher') }}">Teacher Login</a>
+        <br>
+        <a href="{{ url_for('login_student') }}">Student Login</a>
+        <br>
+        <a href="{{ url_for('register_teacher') }}">Register as Teacher</a>
+        <br>
+        <a href="{{ url_for('register_student') }}">Register as Student</a>
+
     </div>
 </body>
 </html>
