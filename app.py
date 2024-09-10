@@ -6,12 +6,12 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with a secure key
 
 # File path for registration details
-REGISTRATION_FILE = 'registration_details.xlsx'
+REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
 
 def get_workbook():
     return openpyxl.load_workbook(filename=REGISTRATION_FILE)
 
-def register_user(email, name, parent_email, password, role, subjects=''):
+def register_user(enrno,email, name, parent_email, password, role, subjects=''):
     wb = get_workbook()
     if role == 'teacher':
         ws = wb['Teachers']
@@ -22,7 +22,7 @@ def register_user(email, name, parent_email, password, role, subjects=''):
     if role == 'teacher':
         ws.append([email, name, hashed_password.decode(), role, subjects])
     else:
-        ws.append([email, name, hashed_password.decode(), role, parent_email])
+        ws.append([enrno, email, name,parent_email, hashed_password.decode(), role])
     wb.save(filename=REGISTRATION_FILE)
 
 def login_user(email, password, role):
@@ -33,7 +33,7 @@ def login_user(email, password, role):
         ws = wb['Students']
     
     for row in ws.iter_rows(min_row=2, values_only=True):
-        if row[0] == email:
+        if row[0] == email or row[1]==email:
             stored_hashed_password = row[2].encode()
             if bcrypt.checkpw(password.encode(), stored_hashed_password):
                 return row  # Return the whole row for further use
@@ -75,11 +75,12 @@ def login_teacher():
 @app.route('/register_student', methods=['GET', 'POST'])
 def register_student():
     if request.method == 'POST':
+        enrno=request.form['enrno']
         email = request.form['email']
         name = request.form['name']
         parent_email = request.form['parent_email']
         password = request.form['password']
-        register_user(email, name, parent_email, password, 'student')
+        register_user(enrno,email, name, parent_email, password, 'student')
         return redirect(url_for('login_student'))
     return render_template('register_student.html')
 
@@ -90,7 +91,7 @@ def register_teacher():
         name = request.form['name']
         password = request.form['password']
         subjects = request.form['subjects']
-        register_user(email, name, '', password, 'teacher', subjects)
+        register_user('',email, name, '', password, 'teacher', subjects)
         return redirect(url_for('login_teacher'))
     return render_template('register_teacher.html')
 
