@@ -6,14 +6,9 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with a secure key
 
-# File path for registration details
-REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
-
-def get_workbook():
-    return openpyxl.load_workbook(filename=REGISTRATION_FILE)
-
 def register_user(enrno, email, name, parent_email, password, role, subjects=''):
-    wb = get_workbook()
+    REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
+    wb = openpyxl.load_workbook(filename=REGISTRATION_FILE)
     if role == 'teacher':
         ws = wb['Teachers']
     else:
@@ -27,7 +22,8 @@ def register_user(enrno, email, name, parent_email, password, role, subjects='')
     wb.save(filename=REGISTRATION_FILE)
 
 def login_user(email, password, role):
-    wb = get_workbook()
+    REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
+    wb = openpyxl.load_workbook(filename=REGISTRATION_FILE)
     if role == 'teacher':
         ws = wb['Teachers']
     else:
@@ -107,10 +103,35 @@ def teacher_dashboard():
         return render_template('teacher_dashboard.html', subjects=subjects)
     return redirect(url_for('index'))
 
+
+def get_student_total_attendance(enrno):
+    wb = openpyxl.load_workbook(filename='workbooks/SE.xlsx',data_only=True)
+    ws = wb['Attendance']  # Assuming there is a sheet called 'Attendance'
+    
+    # Loop through each row, starting from row 2 (skip header)
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row[1] == enrno:  # Assuming column 2 has the enrollment number
+            att=[row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14]]
+            return att  # Assuming the last column contains the total attendance
+
+    return None  # Return None if the student is not found
+
+
 @app.route('/student_dashboard')
 def student_dashboard():
+    wb=openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
+    ws=wb['Students']
+    email=session.get('email')
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row[1] == email:  # Assuming column 2 has the email
+            enrno= row[0]  # Assuming column 1 has the enrollment number
+    
     if 'role' in session and session['role'] == 'student':
-        return render_template('student_dashboard.html')
+        att = get_student_total_attendance(enrno)
+        if att is not None:
+            return render_template('student_dashboard.html', EMIII="{:.2f}".format(att[0]),DS="{:.2f}".format(att[1]),DLCOA="{:.2f}".format(att[2]),CG="{:.2f}".format(att[3]),OOPM="{:.2f}".format(att[4]),DSGT="{:.2f}".format(att[5]), OOPMLAB="{:.2f}".format(att[6]),DSLAB="{:.2f}".format(att[7]), CGLAB="{:.2f}".format(att[8]),DLCOALAB="{:.2f}".format(att[9]),total_attendance="{:.2f}".format(att[10]))
+        else:
+            return 'Attendance not found for the student.'
     return redirect(url_for('index'))
 
 @app.route('/select_subject', methods=['POST'])
