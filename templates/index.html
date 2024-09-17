@@ -7,16 +7,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to the Student Attendance Portal</h1>
-        <a href="{{ url_for('login_teacher') }}">Teacher Login</a>
-        <br>
-        <a href="{{ url_for('login_student') }}">Student Login</a>
-        <br>
-        <a href="{{ url_for('register_teacher') }}">Register as Teacher</a>
-        <br>
-        <a href="{{ url_for('register_student') }}">Register as Student</a>
-
-    </div>
+    <div class="indexcontainer"> 
+        <h1 id="title">Student Attendance Portal</h1>
+        <div class="logins"><a href="{{ url_for('login_teacher') }}">Teacher Login</a>
+            <div><img src="/static/teacher.png" height=50px></div>
+            </div>
+        <div class="logins"><a href="{{ url_for('login_student') }}">Student Login</a>
+            <div><img src="/static/student.png" height=50px></div>
+        </div>
+        <div class="logins"><a href="{{ url_for('register_teacher') }}">Register as Teacher</a>
+            <div><img src="/static/teacher2.png" height=50px></div>
+        </div>
+        <div class="logins"><a href="{{ url_for('register_student') }}">Register as Student</a>
+            <div><img src="/static/student2.png" height=50px></div>
+        </div>
 </body>
 </html>
