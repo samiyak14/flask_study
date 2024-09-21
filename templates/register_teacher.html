@@ -7,21 +7,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h2>Teacher Registration</h2>
+    <div class="treg_container">
+        <h2 class="title">Teacher Registration</h2>
         <form action="{{ url_for('register_teacher') }}" method="post">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <input class="trip" type="email" id="email" name="email" required>
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
+            <input class="trip" type="text" id="name" name="name" required>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <input class="trip" type="password" id="password" name="password" required>
             <label for="subjects">Subjects:</label>
-            <input type="text" id="subjects" name="subjects" required>
+            <input class="trip" type="text" id="subjects" name="subjects" required>
             <button type="submit">Register</button>
         </form>
-        <p>Already have an account? <a href="{{ url_for('login_teacher') }}">Login here</a></p>
-        <p><a href="{{ url_for('index') }}">Back to Home</a></p>
+        <p>Already have an account? <a href="{{ url_for('login_teacher') }}">Login here</a> <br>
+            <a href="{{ url_for('index') }}">Back to Home</a>
+        </p>
     </div>
     
    
