@@ -4,21 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mark Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
 </head>
 <body>
-    <h2>Mark Attendance for {{ selected_subject }} - {{ selected_class }}</h2>
+    <div class="af_container">
+        <h2 class="title" >Mark Attendance for {{ selected_class }} <br></h2> 
+        <h3 class="aftitle" >Subject Name: {{ selected_subject }}</h3>
     
-    <form action="{{ url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject) }}" method="post">
-        <label for="date">Date:</label>
-        <input type="text" id="date" name="date" required><br>
-        
-        <label for="day">Day:</label>
-        <input type="text" id="day" name="day" required><br>
-        
-        <label for="absent_roll_numbers">Enter Absent Roll Numbers (comma-separated):</label><br>
-        <input type="text" id="absent_roll_numbers" name="absent_roll_numbers" required><br><br>
-        
-        <button type="submit">Submit Attendance</button>
-    </form>
+        <form action="{{ url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject) }}" method="post">
+            <label for="date">Date:</label>
+            <input class="afip" type="text" id="date" name="date" required><br>
+            
+            <label for="day">Day:</label>
+            <input class="afip" type="text" id="day" name="day" required><br>
+
+            <h3 class="aftitle">Select Marking Method</h3>
+
+            <label for="absent">Absent Numbers</label>
+            <input class="afip" type="radio" id="absent" name="marking_method" value="absent" checked>
+            <label for="present">Present Numbers</label>
+            <input class="afip" type="radio" id="present" name="marking_method" value="present">
+                    
+            
+            <label for="absent_roll_numbers">Enter Roll Numbers (comma-separated):</label><br>
+            <input  autocomplete="off" class="afip" id="af_absent_ip" type="text"  name="roll_numbers" required>
+            
+            <button type="submit">Submit Attendance</button>
+        </form>
+
+    </div>
 </body>
 </html>

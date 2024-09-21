@@ -153,6 +153,55 @@ body {
     gap: 10px;
 }
 
+.td_container{
+    text-align:left;
+    font-size:20px;
+    text-decoration:bolder;
+    font-family:Arvo;
+    border-width:5px;
+    border-color:white;
+    border-radius: 15px;
+    border-style:solid;
+    border-color:white;
+    border-width: 5px;
+    box-shadow: 0 0 10px black;
+    background-color: #d9f6fc; 
+    width:40%; 
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap: 10px;
+}
+
+.af_container{
+    text-align:left;
+    font-size:20px;
+    text-decoration:bolder;
+    font-family:Arvo;
+    border-width:5px;
+    border-color:white;
+    border-radius: 15px;
+    border-style:solid;
+    border-color:white;
+    border-width: 5px;
+    box-shadow: 0 0 10px black;
+    background-color: #d9f6fc; 
+    width:40%; 
+    display: flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap: 10px;
+    padding:10px;
+    padding-bottom:15px;
+}
+
+.aftitle{
+    font-size:30px;
+    margin:0px;
+}
 
 
 .title{   /*the title class is same for all the login or registration pages.*/
@@ -225,6 +274,41 @@ label {
     width:300px;
     align-content:center;
 
+}
+
+.tdip{
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #0077B6;
+    border-radius: 10px;
+    border-width:3px;
+    margin-bottom:3px;
+    width:300px;
+    align-content:center;
+}
+
+.afip{
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #0077B6;
+    border-radius: 10px;
+    border-width:3px;
+    margin-bottom:5px;
+    width:200px;
+    align-items:center;
+    align-content:center;
+}
+
+#af_absent_ip{
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #0077B6;
+    border-radius: 10px;
+    border-width:3px;
+    margin-bottom:5px;
+    width:300px;
+    align-items:center;
+    align-content:center;
 }
 
 button {  /*button is of the same type for all registration and login pages*/

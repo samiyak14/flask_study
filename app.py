@@ -142,12 +142,59 @@ def select_subject():
         return redirect(url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject))
     return redirect(url_for('index'))
 
+# @app.route('/attendance_form/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
+# def attendance_form(selected_class, selected_subject):
+#     if 'role' in session and session['role'] == 'teacher':
+#         if request.method == 'POST':
+#             absent_roll_numbers = request.form['absent_roll_numbers'].split(',')
+#             absent_roll_numbers = set(int(roll.strip()) for roll in absent_roll_numbers)
+#             date = request.form['date']
+#             day = request.form['day']
+
+#             workbook_name = f'workbooks/{selected_class}.xlsx'
+#             division = selected_subject
+
+#             try:
+#                 book = openpyxl.load_workbook(workbook_name)
+#                 ws = book[division]
+
+#                 current_column = 1
+#                 for row in ws.iter_rows(min_row=2):
+#                     for cell in row:
+#                         if cell.value is None:
+#                             break
+
+#                 current_column = cell.column
+#                 roll_number_column = 1
+
+#                 for row in range(4, ws.max_row + 1):
+#                     roll_number = ws.cell(row=row, column=roll_number_column).value
+#                     cell = ws.cell(row=row, column=current_column)
+
+#                     if roll_number in absent_roll_numbers:
+#                         cell.value = 'A'
+#                     else:
+#                         if cell.value is None:
+#                             cell.value = 'P'
+
+#                 ws.cell(row=2, column=current_column).value = date
+#                 ws.cell(row=3, column=current_column).value = day
+
+#                 book.save(workbook_name)
+
+#                 return render_template('success.html', message='Attendance updated successfully!')
+#             except Exception as e:
+#                 return render_template('error.html', message=f'Error occurred: {e}')
+#         return render_template('attendance_form.html', selected_class=selected_class, selected_subject=selected_subject)
+#     return redirect(url_for('index'))
+
 @app.route('/attendance_form/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
 def attendance_form(selected_class, selected_subject):
     if 'role' in session and session['role'] == 'teacher':
         if request.method == 'POST':
-            absent_roll_numbers = request.form['absent_roll_numbers'].split(',')
-            absent_roll_numbers = set(int(roll.strip()) for roll in absent_roll_numbers)
+            marking_method = request.form['marking_method']  # Get the selected marking method
+            roll_numbers_input = request.form['roll_numbers'].split(',')
+            roll_numbers_input = set(int(roll.strip()) for roll in roll_numbers_input)
             date = request.form['date']
             day = request.form['day']
 
@@ -167,16 +214,27 @@ def attendance_form(selected_class, selected_subject):
                 current_column = cell.column
                 roll_number_column = 1
 
+                # Loop through all the students and mark attendance
                 for row in range(4, ws.max_row + 1):
                     roll_number = ws.cell(row=row, column=roll_number_column).value
                     cell = ws.cell(row=row, column=current_column)
-
-                    if roll_number in absent_roll_numbers:
-                        cell.value = 'A'
+                    
+                    if marking_method == 'absent':
+                        # If marking by absent roll numbers
+                        if roll_number in roll_numbers_input:
+                            cell.value = 'A'  # Absent
+                        else:
+                            if cell.value is None:
+                                cell.value = 'P'  # Present
                     else:
-                        if cell.value is None:
-                            cell.value = 'P'
+                        # If marking by present roll numbers
+                        if roll_number in roll_numbers_input:
+                            cell.value = 'P'  # Present
+                        else:
+                            if cell.value is None:
+                                cell.value = 'A'  # Absent
 
+                # Add the date and day in the top row of the column
                 ws.cell(row=2, column=current_column).value = date
                 ws.cell(row=3, column=current_column).value = day
 
@@ -185,8 +243,10 @@ def attendance_form(selected_class, selected_subject):
                 return render_template('success.html', message='Attendance updated successfully!')
             except Exception as e:
                 return render_template('error.html', message=f'Error occurred: {e}')
+        
         return render_template('attendance_form.html', selected_class=selected_class, selected_subject=selected_subject)
     return redirect(url_for('index'))
+
 
 @app.route('/logout')
 def logout():

@@ -3,22 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Student Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #attendanceChart {
+            width: 50%; /* Set chart width to 50% */
+            height: 400px; /* You can adjust the height as needed */
+            margin: auto; /* Center the chart */
+        }
+    </style>
 </head>
-<body>
-    <h1>Welcome, {{ session['name'] }}</h1>
-    <p>EMIII : {{EMIII}}</p>
-    <p>DS : {{DS}}</p>
-    <p>DLCOA :{{DLCOA}}</p>
-    <p>CG: {{CG}}</p>
-    <p>OOPM : {{OOPM}}</P>
-    <p>DSGT: {{DSGT}}</p>
-    <p>OOPMLAB : {{OOPMLAB}}</p>
-    <p>DSLAB:{{DSLAB}}</p>
-    <p>CGLAB: {{CGLAB}}</p>
-    <p>DLCOALAB: {{DLCOALAB}}</p>
-    <p>Your total attendance: {{ total_attendance }}</p>
-    <a href="{{ url_for('logout') }}">Logout</a>
+<body>                                                                                                                         
+    <h2 class="title">Student Dashboard</h2>
+    <div class="sd_container">
+        <h2>Your Attendance</h2>
+        <canvas id="attendanceChart"></canvas>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
 
+        const attendanceData = {
+            labels: ['EMIII', 'DS', 'DLCOA', 'CG', 'OOPM', 'DSGT', 'OOPMLAB', 'DSLAB', 'CGLAB', 'DLCOALAB'],
+            datasets: [{
+                
+                data: {{ [EMIII, DS, DLCOA, CG, OOPM, DSGT, OOPMLAB, DSLAB, CGLAB, DLCOALAB]|tojson }},
+                backgroundColor: ['#7400b8','#6930c3','#5e60ce','#5390d9','#4ea8de','#48bfe3','#56cfe1','#64dfdf','#72efdd','#80ffdb'],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+    
+        // Initialize chart
+        const attendanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: attendanceData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
