@@ -103,8 +103,19 @@ def teacher_dashboard():
         return render_template('teacher_dashboard.html', subjects=subjects)
     return redirect(url_for('index'))
 
+def get_student_total_attendance_TE(enrno):
+    wb = openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)
+    ws = wb['Attendance']
+    
+    # Loop through each row, starting from row 2 (skip header)
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row[1] == enrno:  # Assuming column 2 has the enrollment number
+            att=[row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15]]
+            return att  # Assuming the last column contains the total attendance
 
-def get_student_total_attendance(enrno):
+    return None  # Return None if the student is not found
+
+def get_student_total_attendance_SE(enrno):
     wb = openpyxl.load_workbook(filename='workbooks/SE.xlsx',data_only=True)
     ws = wb['Attendance']  # Assuming there is a sheet called 'Attendance'
     
@@ -113,26 +124,86 @@ def get_student_total_attendance(enrno):
         if row[1] == enrno:  # Assuming column 2 has the enrollment number
             att=[row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14]]
             return att  # Assuming the last column contains the total attendance
-
     return None  # Return None if the student is not found
+
+def check_enrollment_exists_SE(enrollment_number, filename='SE.xlsx'):
+
+    wb = openpyxl.load_workbook(filename='workbooks/SE.xlsx',data_only=True)
+    ws = wb['Attendance'] 
+
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row[1] == enrollment_number: 
+            return True  # Enrollment number found
+    return False  # Enrollment number not found
+
+def check_enrollment_exists_TE(enrollment_number, filename='TE.xlsx'):
+
+    wb = openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)
+    ws = wb['Attendance'] 
+
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        if row[1] == enrollment_number: 
+            return True  # Enrollment number found
+
+    return False  # Enrollment number not found
 
 
 @app.route('/student_dashboard')
 def student_dashboard():
-    wb=openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
-    ws=wb['Students']
-    email=session.get('email')
+    wb = openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
+    ws = wb['Students']
+    email = session.get('email')
+    enrno = None
+
     for row in ws.iter_rows(min_row=2, values_only=True):
         if row[1] == email:  # Assuming column 2 has the email
-            enrno= row[0]  # Assuming column 1 has the enrollment number
+            enrno = row[0]  # Assuming column 1 has the enrollment number
+            break  # Exit loop once found
     
+    if enrno is None:
+        return 'Student not found.'  # Handle case where email does not match any student
+
     if 'role' in session and session['role'] == 'student':
-        att = get_student_total_attendance(enrno)
-        if att is not None:
-            return render_template('student_dashboard.html', EMIII="{:.2f}".format(att[0]),DS="{:.2f}".format(att[1]),DLCOA="{:.2f}".format(att[2]),CG="{:.2f}".format(att[3]),OOPM="{:.2f}".format(att[4]),DSGT="{:.2f}".format(att[5]), OOPMLAB="{:.2f}".format(att[6]),DSLAB="{:.2f}".format(att[7]), CGLAB="{:.2f}".format(att[8]),DLCOALAB="{:.2f}".format(att[9]),total_attendance="{:.2f}".format(att[10]))
-        else:
-            return 'Attendance not found for the student.'
+        if check_enrollment_exists_SE(enrno):
+            att = get_student_total_attendance_SE(enrno)
+            if att is not None:
+                return render_template('student_dashboard_SE.html', 
+                                       EMIII="{:.2f}".format(att[0]),
+                                       DS="{:.2f}".format(att[1]),
+                                       DLCOA="{:.2f}".format(att[2]),
+                                       CG="{:.2f}".format(att[3]),
+                                       OOPM="{:.2f}".format(att[4]),
+                                       DSGT="{:.2f}".format(att[5]),
+                                       OOPMLAB="{:.2f}".format(att[6]),
+                                       DSLAB="{:.2f}".format(att[7]),
+                                       CGLAB="{:.2f}".format(att[8]),
+                                       DLCOALAB="{:.2f}".format(att[9]),
+                                       total_attendance="{:.2f}".format(att[10]),
+                                       class_name='SE')
+            else:
+                return 'Attendance not found for the student.'
+        elif check_enrollment_exists_TE(enrno):
+            att = get_student_total_attendance_TE(enrno)
+            if att is not None:
+                return render_template('student_dashboard_TE.html', 
+                                       CN="{:.2f}".format(att[0]),
+                                       WC="{:.2f}".format(att[1]),
+                                       AI="{:.2f}".format(att[2]),
+                                       DWHM="{:.2f}".format(att[3]),
+                                       DLOC="{:.2f}".format(att[4]),
+                                       IOT="{:.2f}".format(att[5]),
+                                       BCE="{:.2f}".format(att[6]),
+                                       WCLAB="{:.2f}".format(att[7]),
+                                       AILAB="{:.2f}".format(att[8]),
+                                       DWHMLAB="{:.2f}".format(att[9]),
+                                       BCELAB="{:.2f}".format(att[10]),
+                                       total_attendance="{:.2f}".format(att[11]),
+                                       class_name='TE')
+            else:
+                return 'Attendance not found for the student.'
+
     return redirect(url_for('index'))
+
 
 @app.route('/select_subject', methods=['POST'])
 def select_subject():

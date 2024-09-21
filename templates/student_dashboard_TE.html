@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #attendanceChart {
+            width: 50%; /* Set chart width to 50% */
+            height: 400px; /* You can adjust the height as needed */
+            margin: auto; /* Center the chart */
+        }
+    </style>
+</head>
+<body>                                                                                                                         
+
+    <h2 class="title">Student Dashboard</h2>
+    <div class="sd_container">
+        <h2>Your Attendance</h2>
+        <canvas id="attendanceChart"></canvas>
+    </div>
+
+    <div>
+        Total Attendance: {{ total_attendance }}
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+        const attendanceData = {
+            labels: ['CN', 'WC', 'AI', 'DWHM', 'DLOC', 'IOT', 'BCE', 'WCLAB', 'AILAB', 'DWHMLAB', 'BCELAB'],
+            datasets: [{
+                data: {{ [CN, WC, AI, DWHM, DLOC, IOT, BCE, WCLAB, AILAB, DWHMLAB, BCELAB]|tojson }},
+                backgroundColor: ['#7400b8','#6930c3','#5e60ce','#5390d9','#4ea8de','#48bfe3','#4cc9f0','#56cfe1','#64dfdf','#72efdd','#80ffdb', '#ff6384'],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+    
+        // Initialize chart
+        const attendanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: attendanceData,
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+  
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max:100
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

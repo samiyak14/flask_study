@@ -19,6 +19,10 @@
         <h2>Your Attendance</h2>
         <canvas id="attendanceChart"></canvas>
     </div>
+
+    <div>
+        Your Attendance: {{total_attendance}}
+    </div>
     
     <script>
         const ctx = document.getElementById('attendanceChart').getContext('2d');
@@ -39,9 +43,16 @@
             type: 'bar',
             data: attendanceData,
             options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+  
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        max:100
                     }
                 }
             }
