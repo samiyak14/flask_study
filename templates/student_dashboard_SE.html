@@ -5,32 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        #attendanceChart {
-            width: 50%; /* Set chart width to 50% */
-            height: 400px; /* You can adjust the height as needed */
-            margin: auto; /* Center the chart */
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>                                                                                                                         
-    <h2 class="title">Student Dashboard</h2>
+    
     <div class="sd_container">
-        <h2>Your Attendance</h2>
-        <canvas id="attendanceChart"></canvas>
+        <h2 class="title">{{ session['name'] }}</h2>
+
+        <div class="dashboard_content">
+            <div class="chart_section">
+                <h3 class="sdtitle">Your Attendance</h3>
+                <canvas id="attendanceChart"></canvas>
+            </div>
+
+            <div class="total_attendance_section">
+                <h3 class="sdtitle">Total</h3>
+                <div class="circular-progress">
+                    <div class="inner-circle">
+                        <span class="progress-value">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div>
-        Your Attendance: {{total_attendance}}
-    </div>
-    
     <script>
         const ctx = document.getElementById('attendanceChart').getContext('2d');
-
+    
         const attendanceData = {
             labels: ['EMIII', 'DS', 'DLCOA', 'CG', 'OOPM', 'DSGT', 'OOPMLAB', 'DSLAB', 'CGLAB', 'DLCOALAB'],
             datasets: [{
-                
                 data: {{ [EMIII, DS, DLCOA, CG, OOPM, DSGT, OOPMLAB, DSLAB, CGLAB, DLCOALAB]|tojson }},
                 backgroundColor: ['#7400b8','#6930c3','#5e60ce','#5390d9','#4ea8de','#48bfe3','#56cfe1','#64dfdf','#72efdd','#80ffdb'],
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -38,25 +42,39 @@
             }]
         };
     
-        // Initialize chart
         const attendanceChart = new Chart(ctx, {
             type: 'bar',
             data: attendanceData,
             options: {
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { display: false }
                 },
-  
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        max:100
-                    }
+                    y: { beginAtZero: true, max: 100 }
                 }
             }
         });
+    
+        // Circular Progress for Total Attendance
+        const totalAttendance = {{ total_attendance }}; // Get the total attendance percentage
+        const progressValue = document.querySelector(".progress-value");
+        let progressStartValue = 0;
+        const progressEndValue = totalAttendance; // Set the actual total attendance percentage
+        const speed = 20; // Speed of the animation
+    
+        const progress = setInterval(() => {
+            if (progressStartValue < progressEndValue) {
+                progressStartValue++;
+                progressValue.textContent = `${progressStartValue}%`;
+    
+                // Set the conic gradient to fill the border based on the progress value
+                document.querySelector('.circular-progress').style.background = 
+                    `conic-gradient(#4cc9f0 ${progressStartValue * 3.6}deg, #ededed 0deg)`;
+            } else {
+                clearInterval(progress); // Stop the interval when the percentage is reached
+            }
+        }, speed);
     </script>
+    
 </body>
 </html>

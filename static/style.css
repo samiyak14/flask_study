@@ -175,6 +175,82 @@ body {
     gap: 10px;
 }
 
+.sd_container {
+    background-color: #d9f6fc; 
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 1000px;
+    margin: 50px auto;
+}
+
+
+.dashboard_content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart_section {
+    flex: 3;
+    margin-right: 30px;
+}
+
+canvas {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    width: 100%; /* Adjust width to fill available space */
+    height:70vh;
+}
+.total_attendance_section {
+    flex: 0.4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.circular-progress {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    background: conic-gradient(#ededed 0deg, #ededed 360deg);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.inner-circle {
+    width: 120px;
+    height: 120px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.progress-value {
+    font-size: 35px;
+    font-family:Arvo;
+    font-weight: bold;
+    background-image:linear-gradient(#480ca8,#560bad,#7209b7);
+    color:transparent;
+    -webkit-background-clip: text;
+}
+
+.sdtitle {
+    font-family:Arvo;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
 .af_container{
     text-align:left;
     font-size:20px;
