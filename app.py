@@ -103,6 +103,128 @@ def teacher_dashboard():
         return render_template('teacher_dashboard.html', subjects=subjects)
     return redirect(url_for('index'))
 
+@app.route('/select_subject_form')
+def select_subject_form():
+    if 'role' in session and session['role'] == 'teacher':
+        subjects = session.get('subjects', '').split(', ')  # Retrieve subjects from session
+        return render_template('select_subject.html', subjects=subjects)  # Render the form
+    return redirect(url_for('index'))
+
+@app.route('/select_subject', methods=['POST'])
+def select_subject():
+    if 'role' in session and session['role'] == 'teacher':
+        selected_class = request.form['class']
+        selected_subject = request.form['subject']
+        return redirect(url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject))
+    return redirect(url_for('index'))
+
+@app.route('/view_attendance/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
+def view_attendance(selected_class, selected_subject):
+    if 'role' in session and session['role'] == 'teacher':
+        workbook_name = f'workbooks/{selected_class}.xlsx'
+        
+        try:
+            # Load the workbook
+            book = openpyxl.load_workbook(workbook_name, data_only=True)
+            ws = book[selected_subject]
+            sheet = book['Attendance']
+
+            # Initialize attendance data for the table
+            attendance_data = []
+
+            # Find the subject column index (assumed to start from column 5)
+            subject_column_index = None
+            for col in range(5, sheet.max_column + 1):
+                if sheet.cell(row=1, column=col).value == selected_subject:
+                    subject_column_index = col
+                    break
+
+            # Collect attendance data
+            if subject_column_index is not None:
+                for row in range(2, sheet.max_row + 1):
+                    roll_no = sheet.cell(row=row, column=1).value
+                    student_name = sheet.cell(row=row, column=4).value
+                    attendance_percentage = sheet.cell(row=row, column=subject_column_index).value
+                    if student_name and attendance_percentage is not None:
+                        attendance_data.append((roll_no, student_name, attendance_percentage))
+
+            # Count absences by day of the week for average calculation
+            total_absentee_count = {
+                'Monday': 0,
+                'Tuesday': 0,
+                'Wednesday': 0,
+                'Thursday': 0,
+                'Friday': 0,
+                'Saturday': 0
+            }
+
+            total_students_per_day = {
+                'Monday': 0,
+                'Tuesday': 0,
+                'Wednesday': 0,
+                'Thursday': 0,
+                'Friday': 0,
+                'Saturday': 0
+            }
+
+            # Loop through the days and count absentees
+            for col in range(5, ws.max_column + 1):
+                day_of_week = ws.cell(row=3, column=col).value
+                if day_of_week in total_absentee_count:
+                    for row in range(4, ws.max_row + 1):
+                        attendance_status = ws.cell(row=row, column=col).value
+                        if attendance_status == 'A':  # Check for absence
+                            total_absentee_count[day_of_week] += 1
+                        # Count total students for percentage calculation
+                        total_students_per_day[day_of_week] += 1
+            
+            # Calculate average percentages
+            average_percentage_absentees = {
+                day: round((total_absentee_count[day] / total_students_per_day[day] * 100), 3) if total_students_per_day[day] > 0 else 0
+                for day in total_absentee_count
+            }
+
+            # Convert average_percentage_absentees to lists for Chart.js
+            labels = list(average_percentage_absentees.keys())
+            data = list(average_percentage_absentees.values())
+
+            print("Labels:", labels)
+            print("Data:", data)
+
+            return render_template('view_attendance.html', 
+                                   selected_class=selected_class, 
+                                   selected_subject=selected_subject, 
+                                   attendance_data=attendance_data,
+                                   labels=labels,
+                                   data=data)
+        except Exception as e:
+            return render_template('error.html', message=f'Error occurred: {e}')
+
+    return redirect(url_for('index'))
+
+
+@app.route('/select_subject_view_form')
+def select_subject_view_form():
+    if 'role' in session and session['role']=='teacher':
+        subjects=session.get('subjects','').split(', ')
+        return render_template('select_subject_view.html', subjects=subjects)
+    return redirect(url_for('index'))
+
+@app.route('/select_subject_view', methods=['POST'])
+def select_subject_view():
+    if 'role' in session and session['role'] == 'teacher':
+        selected_class = request.form['class']
+        selected_subject = request.form['subject']
+        return redirect(url_for('view_attendance', selected_class=selected_class, selected_subject=selected_subject))
+    return redirect(url_for('index'))
+
+
+
+
+@app.route('/parent_emails')
+def parent_emails():
+    return render_template('parent_emails.html')
+
 def get_student_total_attendance_TE(enrno):
     wb = openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)
     ws = wb['Attendance']
@@ -203,61 +325,6 @@ def student_dashboard():
                 return 'Attendance not found for the student.'
 
     return redirect(url_for('index'))
-
-
-@app.route('/select_subject', methods=['POST'])
-def select_subject():
-    if 'role' in session and session['role'] == 'teacher':
-        selected_class = request.form['class']
-        selected_subject = request.form['subject']
-        return redirect(url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject))
-    return redirect(url_for('index'))
-
-# @app.route('/attendance_form/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
-# def attendance_form(selected_class, selected_subject):
-#     if 'role' in session and session['role'] == 'teacher':
-#         if request.method == 'POST':
-#             absent_roll_numbers = request.form['absent_roll_numbers'].split(',')
-#             absent_roll_numbers = set(int(roll.strip()) for roll in absent_roll_numbers)
-#             date = request.form['date']
-#             day = request.form['day']
-
-#             workbook_name = f'workbooks/{selected_class}.xlsx'
-#             division = selected_subject
-
-#             try:
-#                 book = openpyxl.load_workbook(workbook_name)
-#                 ws = book[division]
-
-#                 current_column = 1
-#                 for row in ws.iter_rows(min_row=2):
-#                     for cell in row:
-#                         if cell.value is None:
-#                             break
-
-#                 current_column = cell.column
-#                 roll_number_column = 1
-
-#                 for row in range(4, ws.max_row + 1):
-#                     roll_number = ws.cell(row=row, column=roll_number_column).value
-#                     cell = ws.cell(row=row, column=current_column)
-
-#                     if roll_number in absent_roll_numbers:
-#                         cell.value = 'A'
-#                     else:
-#                         if cell.value is None:
-#                             cell.value = 'P'
-
-#                 ws.cell(row=2, column=current_column).value = date
-#                 ws.cell(row=3, column=current_column).value = day
-
-#                 book.save(workbook_name)
-
-#                 return render_template('success.html', message='Attendance updated successfully!')
-#             except Exception as e:
-#                 return render_template('error.html', message=f'Error occurred: {e}')
-#         return render_template('attendance_form.html', selected_class=selected_class, selected_subject=selected_subject)
-#     return redirect(url_for('index'))
 
 @app.route('/attendance_form/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
 def attendance_form(selected_class, selected_subject):

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Attendance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #0077B6;
+        }
+    
+        h1, h2 {
+            text-align: center; /* Align headings to the left */
+            color: transparent;
+            position: relative;
+            margin: 0; /* Remove default margin */
+            padding: 10px 0; /* Add padding if needed */
+            font-family: Arvo;
+            background-image: linear-gradient(black, grey, black);
+            -webkit-background-clip: text;
+        }
+    
+        .container {
+            display: flex; /* Flexbox layout */
+            justify-content: flex-start; /* Align items to the left */
+            align-items: flex-start; /* Align items to the top */
+            margin-top: 20px;
+        }
+    
+        table {
+            width: 100%; /* Reduced width for the table */
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+    
+        th {
+            background-color: #03045e;
+            color: white;
+        }
+    
+        .table_container {
+            width: 45%;
+            border-color: white;
+            border-style: solid;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 15px;
+            background-color: #d9f6fc;
+            box-shadow: 0 0 10px black;
+        }
+    
+        .chart-container {
+            position: fixed; /* Fix the chart's position */
+            top: 150px; /* Distance from the top of the viewport */
+            right: 20px; /* Distance from the right edge */
+            width: 48%; /* Adjusted width for the chart */
+            max-width: 100%; /* Make the chart responsive */
+            margin-top: 0; /* Remove extra margin */
+            padding: 10px; /* Optional: Padding for aesthetics */
+            border-radius: 15px;
+            background-color: #d9f6fc;
+            box-shadow: 0 0 10px black;
+            
+        }
+    
+        .highlight {
+         background-color: rgba(100, 223, 223, 0.5); /* Light red color */
+          color: black; /* Change text color for contrast */
+        }
+
+        canvas {
+            max-width: 100%; /* Make the chart responsive */
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container"> <!-- Flex container for table and chart -->
+        <div class="table_container">
+            <h1>Attendance Report for {{ selected_class }} - {{ selected_subject }}</h1>
+            <h2>Attendance Data</h2>
+            <table>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Attendance Percentage</th>
+                </tr>
+                {% for roll_no, student_name, attendance_percentage in attendance_data %}
+                <tr class="{{ 'highlight' if attendance_percentage < 75 else '' }}">
+                    <td>{{ roll_no }}</td>
+                    <td>{{ student_name }}</td>
+                    <td>{{ "{:.3f}".format(attendance_percentage) }}%</td> 
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="chart-container">
+            <h2>Average Percentage of Absentees by Day</h2>
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        const labels = {{ labels | tojson }};
+        const data = {{ data | tojson }};
+        
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Average Percentage of Absentees (%)',
+                    data: data,
+                    backgroundColor: 'rgba(58, 12, 163, 0.5)', // Reduced opacity
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

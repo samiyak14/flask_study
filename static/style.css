@@ -10,6 +10,7 @@ body {
 }
 
 
+
 .container {
     background-color: white;
     padding: 20px;
@@ -166,7 +167,7 @@ body {
     border-width: 5px;
     box-shadow: 0 0 10px black;
     background-color: #d9f6fc; 
-    width:40%; 
+    width:30%; 
     display: flex;
     flex-wrap: wrap;
     flex-direction:column;
@@ -174,6 +175,30 @@ body {
     align-items:center;
     gap: 10px;
 }
+
+.ss_container{
+    text-align:left;
+    font-size:20px;
+    text-decoration:bolder;
+    font-family:Arvo;
+    border-width:5px;
+    border-color:white;
+    border-radius: 15px;
+    border-style:solid;
+    border-color:white;
+    border-width: 5px;
+    box-shadow: 0 0 10px black;
+    background-color: #d9f6fc; 
+    width:30%; 
+    height:80%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap: 10px;
+}
+
 
 .sd_container {
     background-color: #d9f6fc; 

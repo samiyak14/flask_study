@@ -1,0 +1,37 @@
+<!-- templates/select_subject.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Subject</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+
+    <div class="ss_container">
+        <h2 class="title">Select Class and Subject</h2>
+        <form action="{{ url_for('select_subject') }}" method="POST">
+            <label for="class">Select Class:</label>
+            <select class="tdip" name="class" id="class">
+                <option value="SE">SE</option>
+                <option value="TE">TE</option>
+            </select>
+            <br>
+            <label for="subject">Select Subject:</label>
+            <select class="tdip" name="subject" id="subject">
+                {% for subject in subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+            </select>
+            <br>
+    
+            <button type="submit" >Proceed to mark attendance</button>
+        </form>
+    </div>
+    
+</body>
+</html>
+
+
