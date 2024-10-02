@@ -1,10 +1,20 @@
 from flask import Flask, request, redirect, url_for, render_template, session
+from flask_mail import Mail,Message
 import openpyxl
 import bcrypt
 import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with a secure key
+
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT']=465
+app.config['MAIL_USERNAME']='studentattendanceportal.cse@gmail.com'
+app.config['MAIL_PASSWORD']='vdnd xmsy hcrl yeey'
+app.config['MAIL_USE_TLS']=False
+app.config['MAIL_USE_SSL']=True
+
+mail=Mail(app)
 
 def register_user(enrno, email, name, parent_email, password, role, subjects=''):
     REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
@@ -13,13 +23,18 @@ def register_user(enrno, email, name, parent_email, password, role, subjects='')
         ws = wb['Teachers']
     else:
         ws = wb['Students']
-    
+
+    for row in ws.iter_rows(min_row=2, values_only=True):
+            if row[0]== email or row[1]==email:
+                return False
+
     hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
     if role == 'teacher':
         ws.append([email, name, hashed_password.decode(), role, subjects])
     else:
         ws.append([enrno, email, name, parent_email, hashed_password.decode(), role])
     wb.save(filename=REGISTRATION_FILE)
+    return True
 
 def login_user(email, password, role):
     REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
@@ -81,8 +96,11 @@ def register_student():
         name = request.form['name']
         parent_email = request.form['parent_email']
         password = request.form['password']
-        register_user(enrno, email, name, parent_email, password, 'student')
-        return redirect(url_for('login_student'))
+        if register_user(enrno, email, name, parent_email, password, 'student') is True:
+            return redirect(url_for('login_student'))
+        else:
+            return 'email exists.'
+
     return render_template('register_student.html')
 
 @app.route('/register_teacher', methods=['GET', 'POST'])
@@ -92,8 +110,10 @@ def register_teacher():
         name = request.form['name']
         password = request.form['password']
         subjects = request.form['subjects']
-        register_user('', email, name, '', password, 'teacher', subjects)
-        return redirect(url_for('login_teacher'))
+        if register_user('', email, name, '', password, 'teacher', subjects) is True:
+            return redirect(url_for('login_teacher'))
+        else :
+            return 'Email already exists.'
     return render_template('register_teacher.html')
 
 @app.route('/teacher_dashboard')
@@ -130,7 +150,7 @@ def view_attendance(selected_class, selected_subject):
             sheet = book['Attendance']
 
             # Initialize attendance data for the table
-            attendance_data = []
+            attendance_data = []  #this is going to be a list of tuples.
 
             # Find the subject column index (assumed to start from column 5)
             subject_column_index = None
@@ -147,6 +167,7 @@ def view_attendance(selected_class, selected_subject):
                     attendance_percentage = sheet.cell(row=row, column=subject_column_index).value
                     if student_name and attendance_percentage is not None:
                         attendance_data.append((roll_no, student_name, attendance_percentage))
+            print(attendance_data)
 
             # Count absences by day of the week for average calculation
             total_absentee_count = {
@@ -219,11 +240,79 @@ def select_subject_view():
     return redirect(url_for('index'))
 
 
-
-
-@app.route('/parent_emails')
+@app.route('/parent_emails',methods=['GET','POST'])
 def parent_emails():
-    return render_template('parent_emails.html')
+    wbr=openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
+    sheet_s=wbr['Students']
+    s_details=[]  #store all the enrollment numbers of registered students
+    for row in sheet_s.iter_rows(min_row=2, values_only=True):
+        s_details.append(row[0])
+    print(s_details)
+    
+    defaulter_list1=[] #stores the registered students enr nos who have less attendance
+    defaulter_list=[]
+    for enr in s_details :
+        if check_enrollment_exists_SE(enr) is True:
+            wbSE=openpyxl.load_workbook(filename='workbooks/SE.xlsx',data_only=True)
+            sheet1=wbSE['Attendance']
+
+            for row in sheet1.iter_rows(min_row=2,values_only=True):
+                if enr==row[1] and row[14]<75.00 :
+                    defaulter_list.append(enr)
+                    defaulter_list1.append((enr,row[3],row[14]))
+        elif check_enrollment_exists_TE(enr) is True:
+            wbSE=openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)
+            sheet1=wbSE['Attendance']
+
+            for row in sheet1.iter_rows(min_row=2,values_only=True):
+                if enr==row[1] and row[14]<75.00 :
+                    defaulter_list.append(enr)
+                    defaulter_list1.append((enr,row[3],row[15]))          
+                    
+    print(defaulter_list)
+    d_details=[]  #stores the name and parents id and attendance of the students with less attendance for sending formatted emails.
+    
+    
+
+    for enrno in defaulter_list :
+        for row in sheet_s.iter_rows(min_row=2,values_only=True):
+            if enrno==row[0]:       
+                d_details.append({'name':row[2],'parents_mail_id':row[3]})
+
+    if request.method=='POST':
+        try:
+            i=0
+            for student in d_details:
+                name=student['name']
+                recipient=student['parents_mail_id']
+                email_template = """Dear Parent,
+
+We hope this email finds you well. We are writing to inform you that your child, {name}, has an average attendance rate below the mandatory 75%.
+
+Regular attendance is crucial for his/her academic success, and we encourage you to discuss the importance of attending classes regularly. If the attendance continues to be low, strict measures may need to be taken as per the university norms.
+
+Please feel free to reach out if you have any questions or require further information.
+
+Best regards,
+Department of CSE (AI-ML)
+Finolex Academy of Management and Technology
+"""
+                
+
+                personalised_email=email_template.format(name=name)
+
+                msg = Message(f"{name}'s Attendance below 75%",sender='studentattendanceportal.cse@gmail.com', recipients=[recipient])
+
+                msg.body=personalised_email
+
+                mail.send(msg)
+
+            return('Email sent successfully.')
+
+        except Exception as e:
+            return f"Failed to send email: {str(e)}"
+
+    return render_template('parent_emails.html',defaulter_list1=defaulter_list1)
 
 def get_student_total_attendance_TE(enrno):
     wb = openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)

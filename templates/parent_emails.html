@@ -1,1 +1,99 @@
-<p>this page is for sending emails to parents</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Emails to Defaulters</title>
+    <style>
+        body {
+            font-family: Arvo;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image:linear-gradient(#03045E, #0077B6, #00B4D8, #90E0EF, #CAF0F8)
+
+        }
+        #pe_Container {
+            font-family:Arvo;
+            width: 80%;
+            max-width: 800px;
+            background-color: #d9f6fc; 
+            border: 1px solid #ddd;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        h1 {
+            text-align: center;
+            color:transparent;
+            background-image: linear-gradient(black,grey,black);
+            -webkit-background-clip: text;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: aliceblue;
+        }
+        table, th, td {
+            border: 1px solid #023e8a;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #90E0EF;
+        }
+
+        button {  /*button is of the same type for all registration and login pages*/
+            border-radius: 4px;
+            background-color: #0077B6;
+            color: white;
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #03045E;
+        }
+
+        #logout_container{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="pe_Container">
+        <h1>Send emails to the following students with attendance below 75%</h1>
+        <table>
+            <tr>
+                <th>Enrollment No.</th>
+                <th>Name</th>
+                <th>Overall Attendance</th>
+            </tr>
+            {% for EnrollmentNo, name, attendance_percentage in defaulter_list1 %}
+                <tr>
+                    <td>{{ EnrollmentNo }}</td>
+                    <td>{{ name }}</td>
+                    <td>{{"{:.3f}".format(attendance_percentage)}}%</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <form method="POST">
+            <button type="submit">Send Emails</button>
+        </form>
+        <div id="logout_container"><a href="{{ url_for('logout') }}">Logout</a> <br>
+            <a href="{{ url_for('teacher_dashboard') }}">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

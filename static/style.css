@@ -229,6 +229,7 @@ canvas {
     width: 100%; /* Adjust width to fill available space */
     height:70vh;
 }
+
 .total_attendance_section {
     flex: 0.4;
     display: flex;

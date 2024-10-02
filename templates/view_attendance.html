@@ -82,6 +82,10 @@
         canvas {
             max-width: 100%; /* Make the chart responsive */
         }
+
+        #logout_container{
+            text-align: center;
+        }
     </style>
     
 </head>
@@ -108,7 +112,10 @@
 
         <div class="chart-container">
             <h2>Average Percentage of Absentees by Day</h2>
-            <canvas id="attendanceChart"></canvas>
+            <canvas id="attendanceChart"></canvas><br>
+            <div id="logout_container"><a href="{{ url_for('logout') }}">Logout</a> <br>
+                <a href="{{ url_for('teacher_dashboard') }}">Back to Dashboard</a>
+            </div>
         </div>
     </div>
 
