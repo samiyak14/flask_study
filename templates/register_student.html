@@ -9,9 +9,9 @@
 <body>
     <div class="sreg_container">
         <h2 class="title">Student Registration</h2>
-        <form  id="sreg_form" action="{{ url_for('register_student') }}" method="post">
+        <form  id="sreg_form" action="{{ url_for('register_student') }}" method="post" autocomplete="off">
             <label for="Enrollment Number">Enrollment Number:</label>
-            <input class="srip" type="text" id="enrno" name="enrno" required>
+            <input class="srip" type="text" id="enrno" name="enrno" required placeholder="e.g. R-23-0014">
             <label for="email">Email:</label>
             <input class="srip" type="email" id="email" name="email" required>
             <label for="name">Name:</label>

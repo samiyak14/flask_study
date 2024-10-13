@@ -13,12 +13,12 @@
         <h2 class="title" >Mark Attendance for {{ selected_class }} <br></h2> 
         <h3 class="aftitle" >Subject Name: {{ selected_subject }}</h3>
     
-        <form action="{{ url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject) }}" method="post">
+        <form action="{{ url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject) }}" method="post" autocomplete="off">
             <label for="date">Date:</label>
-            <input class="afip" type="text" id="date" name="date" required><br>
+            <input class="afip" type="text" id="date" name="date" placeholder="DD/MM"><br>
             
             <label for="day">Day:</label>
-            <input class="afip" type="text" id="day" name="day" required><br>
+            <input class="afip" type="text" id="day" name="day" placeholder="e.g. Monday" required><br>
 
             <h3 class="aftitle">Select Marking Method</h3>
 
@@ -29,7 +29,7 @@
                     
             
             <label for="absent_roll_numbers">Enter Roll Numbers (comma-separated):</label><br>
-            <input  autocomplete="off" class="afip" id="af_absent_ip" type="text"  name="roll_numbers" required>
+            <input  autocomplete="off" class="afip" id="af_absent_ip" type="text"  name="roll_numbers" placeholder="21, 22, 23, etc" required>
             
             <button type="submit">Submit Attendance</button>
         </form>

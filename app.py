@@ -2,10 +2,10 @@ from flask import Flask, request, redirect, url_for, render_template, session
 from flask_mail import Mail,Message
 import openpyxl
 import bcrypt
-import os
+
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with a secure key
+app.secret_key = '0ec9e84f522344bda9ff60b99457800a'  
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT']=465
@@ -52,7 +52,7 @@ def login_user(email, password, role):
         if row[1] == email:
             stored_hashed_password = row[4].encode()
             if bcrypt.checkpw(password.encode(), stored_hashed_password):
-                return row  # Return the whole row for further use
+                return row  
     return None
 
 @app.route('/')
@@ -127,7 +127,7 @@ def teacher_dashboard():
 def select_subject_form():
     if 'role' in session and session['role'] == 'teacher':
         subjects = session.get('subjects', '').split(', ')  # Retrieve subjects from session
-        return render_template('select_subject.html', subjects=subjects)  # Render the form
+        return render_template('select_subject.html', subjects=subjects) 
     return redirect(url_for('index'))
 
 @app.route('/select_subject', methods=['POST'])
@@ -144,15 +144,12 @@ def view_attendance(selected_class, selected_subject):
         workbook_name = f'workbooks/{selected_class}.xlsx'
         
         try:
-            # Load the workbook
             book = openpyxl.load_workbook(workbook_name, data_only=True)
             ws = book[selected_subject]
             sheet = book['Attendance']
 
-            # Initialize attendance data for the table
             attendance_data = []  #this is going to be a list of tuples.
 
-            # Find the subject column index (assumed to start from column 5)
             subject_column_index = None
             for col in range(5, sheet.max_column + 1):
                 if sheet.cell(row=1, column=col).value == selected_subject:
@@ -240,51 +237,52 @@ def select_subject_view():
     return redirect(url_for('index'))
 
 
-@app.route('/parent_emails',methods=['GET','POST'])
+@app.route('/parent_emails', methods=['GET', 'POST'])
 def parent_emails():
-    wbr=openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
-    sheet_s=wbr['Students']
-    s_details=[]  #store all the enrollment numbers of registered students
+    wbr = openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
+    sheet_s = wbr['Students']
+    s_details = []  # store all the enrollment numbers of registered students
     for row in sheet_s.iter_rows(min_row=2, values_only=True):
         s_details.append(row[0])
     print(s_details)
+
+    defaulter_list1 = []  # stores the registered students' enrollment numbers with less attendance
+    defaulter_list = []
     
-    defaulter_list1=[] #stores the registered students enr nos who have less attendance
-    defaulter_list=[]
-    for enr in s_details :
-        if check_enrollment_exists_SE(enr) is True:
-            wbSE=openpyxl.load_workbook(filename='workbooks/SE.xlsx',data_only=True)
-            sheet1=wbSE['Attendance']
+    for enr in s_details:
+        if check_enrollment_exists_SE(enr):
+            wbSE = openpyxl.load_workbook(filename='workbooks/SE.xlsx', data_only=True)
+            sheet1 = wbSE['Attendance']
 
-            for row in sheet1.iter_rows(min_row=2,values_only=True):
-                if enr==row[1] and row[14]<75.00 :
+            for row in sheet1.iter_rows(min_row=2, values_only=True):
+                attendance_value = row[14]
+                if enr == row[1] and isinstance(attendance_value, (int, float)) and attendance_value < 75.00:
                     defaulter_list.append(enr)
-                    defaulter_list1.append((enr,row[3],row[14]))
-        elif check_enrollment_exists_TE(enr) is True:
-            wbSE=openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)
-            sheet1=wbSE['Attendance']
+                    defaulter_list1.append((enr, row[3], attendance_value))
 
-            for row in sheet1.iter_rows(min_row=2,values_only=True):
-                if enr==row[1] and row[14]<75.00 :
+        elif check_enrollment_exists_TE(enr):
+            wbSE = openpyxl.load_workbook(filename='workbooks/TE.xlsx', data_only=True)
+            sheet1 = wbSE['Attendance']
+
+            for row in sheet1.iter_rows(min_row=2, values_only=True):
+                attendance_value = row[15]
+                if enr == row[1] and isinstance(attendance_value, (int, float)) and attendance_value < 75.00:
                     defaulter_list.append(enr)
-                    defaulter_list1.append((enr,row[3],row[15]))          
-                    
+                    defaulter_list1.append((enr, row[3], attendance_value))
+
     print(defaulter_list)
-    d_details=[]  #stores the name and parents id and attendance of the students with less attendance for sending formatted emails.
-    
-    
+    d_details = []  # stores the name and parent's email of students with less attendance for sending formatted emails.
 
-    for enrno in defaulter_list :
-        for row in sheet_s.iter_rows(min_row=2,values_only=True):
-            if enrno==row[0]:       
-                d_details.append({'name':row[2],'parents_mail_id':row[3]})
+    for enrno in defaulter_list:
+        for row in sheet_s.iter_rows(min_row=2, values_only=True):
+            if enrno == row[0]:
+                d_details.append({'name': row[2], 'parents_mail_id': row[3]})
 
-    if request.method=='POST':
+    if request.method == 'POST':
         try:
-            i=0
             for student in d_details:
-                name=student['name']
-                recipient=student['parents_mail_id']
+                name = student['name']
+                recipient = student['parents_mail_id']
                 email_template = """Dear Parent,
 
 We hope this email finds you well. We are writing to inform you that your child, {name}, has an average attendance rate below the mandatory 75%.
@@ -297,44 +295,42 @@ Best regards,
 Department of CSE (AI-ML)
 Finolex Academy of Management and Technology
 """
-                
 
-                personalised_email=email_template.format(name=name)
-
-                msg = Message(f"{name}'s Attendance below 75%",sender='studentattendanceportal.cse@gmail.com', recipients=[recipient])
-
-                msg.body=personalised_email
+                personalised_email = email_template.format(name=name)
+                msg = Message(f"{name}'s Attendance below 75%", sender='studentattendanceportal.cse@gmail.com', recipients=[recipient])
+                msg.body = personalised_email
 
                 mail.send(msg)
 
-            return('Email sent successfully.')
+            return render_template('success.html', message="Emails sent successfully.")
 
         except Exception as e:
             return f"Failed to send email: {str(e)}"
 
-    return render_template('parent_emails.html',defaulter_list1=defaulter_list1)
+    return render_template('parent_emails.html', defaulter_list1=defaulter_list1)
+
 
 def get_student_total_attendance_TE(enrno):
     wb = openpyxl.load_workbook(filename='workbooks/TE.xlsx',data_only=True)
     ws = wb['Attendance']
     
-    # Loop through each row, starting from row 2 (skip header)
+
     for row in ws.iter_rows(min_row=2, values_only=True):
-        if row[1] == enrno:  # Assuming column 2 has the enrollment number
+        if row[1] == enrno: 
             att=[row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15]]
-            return att  # Assuming the last column contains the total attendance
+            return att 
 
     return None  # Return None if the student is not found
 
 def get_student_total_attendance_SE(enrno):
     wb = openpyxl.load_workbook(filename='workbooks/SE.xlsx',data_only=True)
-    ws = wb['Attendance']  # Assuming there is a sheet called 'Attendance'
+    ws = wb['Attendance']  
     
-    # Loop through each row, starting from row 2 (skip header)
+
     for row in ws.iter_rows(min_row=2, values_only=True):
-        if row[1] == enrno:  # Assuming column 2 has the enrollment number
+        if row[1] == enrno:  
             att=[row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14]]
-            return att  # Assuming the last column contains the total attendance
+            return att  
     return None  # Return None if the student is not found
 
 def check_enrollment_exists_SE(enrollment_number, filename='SE.xlsx'):
@@ -354,9 +350,9 @@ def check_enrollment_exists_TE(enrollment_number, filename='TE.xlsx'):
 
     for row in ws.iter_rows(min_row=2, values_only=True):
         if row[1] == enrollment_number: 
-            return True  # Enrollment number found
+            return True  
 
-    return False  # Enrollment number not found
+    return False  
 
 
 @app.route('/student_dashboard')
@@ -367,8 +363,8 @@ def student_dashboard():
     enrno = None
 
     for row in ws.iter_rows(min_row=2, values_only=True):
-        if row[1] == email:  # Assuming column 2 has the email
-            enrno = row[0]  # Assuming column 1 has the enrollment number
+        if row[1] == email:  
+            enrno = row[0]  
             break  # Exit loop once found
     
     if enrno is None:
@@ -456,10 +452,10 @@ def attendance_form(selected_class, selected_subject):
                     else:
                         # If marking by present roll numbers
                         if roll_number in roll_numbers_input:
-                            cell.value = 'P'  # Present
+                            cell.value = 'P' 
                         else:
                             if cell.value is None:
-                                cell.value = 'A'  # Absent
+                                cell.value = 'A'  
 
                 # Add the date and day in the top row of the column
                 ws.cell(row=2, column=current_column).value = date

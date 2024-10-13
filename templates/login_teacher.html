@@ -9,7 +9,7 @@
 <body>
     <div class="tlogin_container">
         <h2 class="title">Teacher Login</h2>
-        <form class="tloginform" action="{{ url_for('login_teacher') }}" method="post">
+        <form class="tloginform" action="{{ url_for('login_teacher') }}" autocomplete="off" method="post">
             <label for="email">Email:</label>
             <input class="tlip" type="email" id="email" name="email" required>
             <label for="password">Password:</label>
