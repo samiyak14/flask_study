@@ -16,7 +16,7 @@ app.config['MAIL_USE_SSL']=True
 
 mail=Mail(app)
 
-def register_user(enrno, email, name, parent_email, password, role, subjects=''):
+def register_user(enrno, email, name, parent_email, password, role, subjects=''): 
     REGISTRATION_FILE = 'workbooks/registration_details.xlsx'
     wb = openpyxl.load_workbook(filename=REGISTRATION_FILE)
     if role == 'teacher':
@@ -68,7 +68,7 @@ def login_student():
         if user_data:
             session['email'] = email
             session['role'] = 'student'
-            session['name'] = user_data[2]  # Extract name
+            session['name'] = user_data[2]  
             return redirect(url_for('student_dashboard'))
         return 'Invalid credentials.'
     return render_template('login_student.html')
@@ -123,19 +123,19 @@ def teacher_dashboard():
         return render_template('teacher_dashboard.html', subjects=subjects)
     return redirect(url_for('index'))
 
-@app.route('/select_subject_form')
-def select_subject_form():
-    if 'role' in session and session['role'] == 'teacher':
-        subjects = session.get('subjects', '').split(', ')  # Retrieve subjects from session
-        return render_template('select_subject.html', subjects=subjects) 
+@app.route('/select_subject_view_form')
+def select_subject_view_form():
+    if 'role' in session and session['role']=='teacher':
+        subjects=session.get('subjects','').split(', ')
+        return render_template('select_subject_view.html', subjects=subjects)
     return redirect(url_for('index'))
 
-@app.route('/select_subject', methods=['POST'])
-def select_subject():
+@app.route('/select_subject_view', methods=['POST'])
+def select_subject_view():
     if 'role' in session and session['role'] == 'teacher':
         selected_class = request.form['class']
         selected_subject = request.form['subject']
-        return redirect(url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject))
+        return redirect(url_for('view_attendance', selected_class=selected_class, selected_subject=selected_subject))
     return redirect(url_for('index'))
 
 @app.route('/view_attendance/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
@@ -191,9 +191,9 @@ def view_attendance(selected_class, selected_subject):
                 if day_of_week in total_absentee_count:
                     for row in range(4, ws.max_row + 1):
                         attendance_status = ws.cell(row=row, column=col).value
-                        if attendance_status == 'A':  # Check for absence
+                        if attendance_status == 'A':  
                             total_absentee_count[day_of_week] += 1
-                        # Count total students for percentage calculation
+                        
                         total_students_per_day[day_of_week] += 1
             
             # Calculate average percentages
@@ -221,22 +221,6 @@ def view_attendance(selected_class, selected_subject):
     return redirect(url_for('index'))
 
 
-@app.route('/select_subject_view_form')
-def select_subject_view_form():
-    if 'role' in session and session['role']=='teacher':
-        subjects=session.get('subjects','').split(', ')
-        return render_template('select_subject_view.html', subjects=subjects)
-    return redirect(url_for('index'))
-
-@app.route('/select_subject_view', methods=['POST'])
-def select_subject_view():
-    if 'role' in session and session['role'] == 'teacher':
-        selected_class = request.form['class']
-        selected_subject = request.form['subject']
-        return redirect(url_for('view_attendance', selected_class=selected_class, selected_subject=selected_subject))
-    return redirect(url_for('index'))
-
-
 @app.route('/parent_emails', methods=['GET', 'POST'])
 def parent_emails():
     wbr = openpyxl.load_workbook(filename='workbooks/registration_details.xlsx')
@@ -247,7 +231,7 @@ def parent_emails():
     print(s_details)
 
     defaulter_list1 = []  # stores the registered students' enrollment numbers with less attendance
-    defaulter_list = []
+    defaulter_list = []  
     
     for enr in s_details:
         if check_enrollment_exists_SE(enr):
@@ -284,13 +268,9 @@ def parent_emails():
                 name = student['name']
                 recipient = student['parents_mail_id']
                 email_template = """Dear Parent,
-
 We hope this email finds you well. We are writing to inform you that your child, {name}, has an average attendance rate below the mandatory 75%.
-
 Regular attendance is crucial for his/her academic success, and we encourage you to discuss the importance of attending classes regularly. If the attendance continues to be low, strict measures may need to be taken as per the university norms.
-
 Please feel free to reach out if you have any questions or require further information.
-
 Best regards,
 Department of CSE (AI-ML)
 Finolex Academy of Management and Technology
@@ -410,12 +390,26 @@ def student_dashboard():
                 return 'Attendance not found for the student.'
 
     return redirect(url_for('index'))
+@app.route('/select_subject_form')
+def select_subject_form():
+    if 'role' in session and session['role'] == 'teacher':
+        subjects = session.get('subjects', '').split(', ')  # Retrieve subjects from session
+        return render_template('select_subject.html', subjects=subjects) 
+    return redirect(url_for('index'))
+
+@app.route('/select_subject', methods=['POST'])
+def select_subject():
+    if 'role' in session and session['role'] == 'teacher':
+        selected_class = request.form['class']
+        selected_subject = request.form['subject']
+        return redirect(url_for('attendance_form', selected_class=selected_class, selected_subject=selected_subject))
+    return redirect(url_for('index'))
 
 @app.route('/attendance_form/<selected_class>/<selected_subject>', methods=['GET', 'POST'])
 def attendance_form(selected_class, selected_subject):
     if 'role' in session and session['role'] == 'teacher':
         if request.method == 'POST':
-            marking_method = request.form['marking_method']  # Get the selected marking method
+            marking_method = request.form['marking_method']  
             roll_numbers_input = request.form['roll_numbers'].split(',')
             roll_numbers_input = set(int(roll.strip()) for roll in roll_numbers_input)
             date = request.form['date']
@@ -437,7 +431,7 @@ def attendance_form(selected_class, selected_subject):
                 current_column = cell.column
                 roll_number_column = 1
 
-                # Loop through all the students and mark attendance
+                
                 for row in range(4, ws.max_row + 1):
                     roll_number = ws.cell(row=row, column=roll_number_column).value
                     cell = ws.cell(row=row, column=current_column)
@@ -445,10 +439,10 @@ def attendance_form(selected_class, selected_subject):
                     if marking_method == 'absent':
                         # If marking by absent roll numbers
                         if roll_number in roll_numbers_input:
-                            cell.value = 'A'  # Absent
+                            cell.value = 'A'  
                         else:
                             if cell.value is None:
-                                cell.value = 'P'  # Present
+                                cell.value = 'P'  
                     else:
                         # If marking by present roll numbers
                         if roll_number in roll_numbers_input:
